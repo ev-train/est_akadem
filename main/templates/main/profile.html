@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+
+	<title>ЭА | Профиль</title>
+  <meta name="description" content="">
+	<meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'main/css/bootstrap.min.css' %}" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300&display=swap" rel="stylesheet"> 
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar-dark navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'main:index' %}">
+          <img src="/static/main/img/logo.png" alt="" class="d-inline-block align-text-top logo">
+           Эстетика Академгородка
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'main:about' %}">О проекте</a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{% url 'main:profile' user.profile.id %}">Мой профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_profile' user.profile.id %}">Изменить профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_account' %}">Изменить аккаунт</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
+              </ul>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:login' %}">Войти</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:register' %}">Зарегистрироваться</a>
+            </li>
+            {% endif %}
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="profile">
+      {% if page_user.profile_pic %}
+        <img class="profile-photo" src="{{ page_user.profile_pic.url }}" alt="image">
+      {% else %}
+        <img class="profile-photo" src="/static/main/img/profile-pic.png" alt="image"> 
+      {% endif %}
+
+      <div class="profile-info">
+
+        <div><a class="post-author fs-2" href="{% url 'main:profile' page_user.id %}">{{ page_user }}</a></div>
+
+        {% if page_user.website_url %}
+          <a href="https://{{ page_user.website_url }}" target="_blank" class="profile-link">Website</a>
+          <span class="vertical-bar"> | </span>
+        {% else %}
+          <span class="profile-link-disabled">Website</span>
+          <span class="vertical-bar"> | </span>
+        {% endif %}
+
+        {% if page_user.inst_url %}
+          <a href="https://{{ page_user.inst_url }}" target="_blank" class="profile-link">Instagram</a>
+          <span class="vertical-bar"> | </span>
+        {% else %}
+          <span class="profile-link-disabled">Instagram</span>
+          <span class="vertical-bar"> | </span>
+        {% endif %}
+
+        {% if page_user.vk_url %}
+          <a href="https://{{ page_user.vk_url }}" target="_blank" class="profile-link">Vk</a> 
+        {% else %}
+          <span class="profile-link-disabled">Vk</span>
+        {% endif %}
+
+        <div class="profile-bio">
+          {% if page_user.bio %}
+            {{ page_user.bio|linebreaks }}
+          {% endif %}
+        </div>
+
+      </div> 
+
+    </div>
+
+    <div class="posts">
+      <h3 class="user-posts-heading">Публикации пользователя:</h3>
+      
+      {% for el in user_post_list %}
+      <div class="post rounded">
+        {% if el.post_author.profile.profile_pic %}
+          <img src="{{ el.post_author.profile.profile_pic.url }}" class="post-author-pic" alt="image">
+        {% else %}
+          <img class="post-author-pic" src="/static/main/img/profile-pic.png" alt="image"> 
+        {% endif %}
+        <div class="post-info">
+          <div><a class="post-author fs-4" href="{% url 'main:profile' el.post_author.profile.id %}">{{ el.post_author }}</a></div>
+          <span class="post-date">{{ el.post_date }} </span>
+          {% if request.user.is_authenticated and el.post_author == user %}
+            <span class="vertical-bar"> | </span>
+            <span type="button" class="delete-post" data-bs-toggle="modal" data-bs-target="#delete-post{{el.id}}">Удалить</span>
+            <div class="modal fade" id="delete-post{{el.id}}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <h4 class="text-center">Вы уверены, что хотите удалить публикацию от {{ el.post_date }}?</h4>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                    <a href="{% url 'main:delete_post' el.id %}" class="btn btn-outline-danger" role="button">Да</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+          <div class="post-text">{{ el.post_text|linebreaks }}</div>
+        </div>
+
+        <div class="post-photos">
+        {% for photo in photo_list %}
+          {% if el == photo.post %}
+            <a href="#photo{{photo.id}}" data-bs-toggle="modal" class="photo-link"><img class="post-photo col-xl-3 col-md-4 col-sm-6 col-xs-12" src="{{photo.image.url}}" alt="image"></a>
+            <div class="modal" id="photo{{photo.id}}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <a href="{{photo.image.url}}" target="_blank"><img class="img-fluid" src="{{photo.image.url}}" alt="image"></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+        <a class="btn btn-outline-secondary comments-count" href="{% url 'main:post' el.id %}" target="_blank">
+          <img class="icon" src="/static/main/img/speech-grey.png" alt="Комментарии: "> {{ el.comment_set.count }}
+        </a>
+        {% else %}
+        <a class="btn btn-outline-secondary comments-count" href="#login-or-register" data-bs-toggle="modal">
+          <img class="icon" src="/static/main/img/speech-grey.png" alt="Комментарии: "> {{ el.comment_set.count }}
+        </a>
+        <div class="modal" id="login-or-register" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5>
+                  <a href="{% url 'main:login' %}" class="links">Войдите</a> или 
+                  <a href="{% url 'main:register' %}" class="links">зарегистрируйтесь</a>, чтобы оставлять и просматривать комментарии.
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+
+    </div>
+    
+    
+
+  </div>  
+	<script src="{% static 'main/js/bootstrap.min.js' %}"></script> 
+	
+</body>
+</html>

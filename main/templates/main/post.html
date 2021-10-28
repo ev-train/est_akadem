@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+
+	<title>ЭА | Публикация</title>
+    <meta name="description" content="">
+	<meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'main/css/bootstrap.min.css' %}" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300&display=swap" rel="stylesheet"> 
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar-dark navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'main:index' %}">
+          <img src="/static/main/img/logo.png" alt="" class="d-inline-block align-text-top logo">
+           Эстетика Академгородка
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'main:about' %}">О проекте</a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{% url 'main:profile' user.profile.id %}">Мой профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_profile' user.profile.id %}">Изменить профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_account' %}">Изменить аккаунт</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
+              </ul>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:login' %}">Войти</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:register' %}">Зарегистрироваться</a>
+            </li>
+            {% endif %}
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="post">
+      {% if post.post_author.profile.profile_pic %}
+        <img src="{{ post.post_author.profile.profile_pic.url }}" class="post-author-pic" alt="image">
+      {% else %}
+        <img class="post-author-pic" src="/static/main/img/profile-pic.png" alt="image"> 
+      {% endif %}
+      <div class="post-info">
+        <div><a class="post-author fs-4" href="{% url 'main:profile' post.post_author.profile.id %}" target="_blank">{{ post.post_author }}</a></div>
+        <span class="post-date">{{ post.post_date }} </span>
+        {% if request.user.is_authenticated and post.post_author == user %}
+          <span class="vertical-bar"> | </span>
+          <span type="button" class="delete-post" data-bs-toggle="modal" data-bs-target="#delete-post{{post.id}}">Удалить</span>
+          <div class="modal fade" id="delete-post{{post.id}}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-body">
+                  <h4 class="text-center">Вы уверены, что хотите удалить публикацию от {{ post.post_date }}?</h4>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                  <a href="{% url 'main:delete_post' post.id %}" class="btn btn-outline-danger" role="button">Да</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        <div class="post-text">{{ post.post_text|linebreaks }}</div>
+      </div>
+
+      <div class="post-photos">
+      {% for photo in photo_list %}
+        {% if post == photo.post %}
+          <a href="#photo{{photo.id}}" data-bs-toggle="modal" class="photo-link"><img class="post-photo col-xl-3 col-md-4 col-sm-6 col-xs-12" src="{{photo.image.url}}" alt="image"></a>
+          <div class="modal" id="photo{{photo.id}}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-body">
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <a href="{{photo.image.url}}" target="_blank"><img class="img-fluid" src="{{photo.image.url}}" alt="image"></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      </div>
+
+    </div>
+
+      <div class="add-comment">
+        <h5>Добавьте комментарий:</h5>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button class="btn btn-success">Отправить</button>
+        </form>
+      </div>
+
+
+      <div class="comments">
+
+        <h4 class="comments-heading">Комментарии ({{ post.comment_set.count }}):</h4>
+
+        {% for comm in comment_list %}
+          {% if comm.comment_post == post %}
+            <div class="comment rounded">
+              {% if comm.comment_author.profile.profile_pic %}
+                <img src="{{ comm.comment_author.profile.profile_pic.url }}" class="comment-author-pic" alt="image">
+              {% else %}
+                <img class="comment-author-pic" src="/static/main/img/profile-pic.png" alt="image"> 
+              {% endif %}
+
+              <div class="comment-info">
+                <a href="{% url 'main:profile' comm.comment_author.profile.id %}" class="post-author">{{comm.comment_author.username}}</a>
+                <div class="comment-text">{{ comm.comment_text|linebreaks }}</div>
+                <span class="comment-date">{{ comm.comment_date }}</span>
+
+                {% if request.user.is_authenticated and comm.comment_author == user %}
+                  <span class="comment-date"> | </span>
+                  <span type="button" class="delete-comment" data-bs-toggle="modal" data-bs-target="#delete-comm{{comm.id}}">Удалить</span>
+                  <div class="modal fade" id="delete-comm{{comm.id}}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content">
+                        <div class="modal-body">
+                          <h4 class="text-center">Вы уверены, что хотите удалить комментарий "{{ comm.comment_text }}"?</h4>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                          <a href="{% url 'main:delete_comment' comm.id %}" class="btn btn-outline-danger" role="button">Да</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+
+            </div>
+
+          {% endif %}
+        {% endfor %}
+      </div>
+
+
+    
+    
+
+  </div>  
+	<script src="{% static 'main/js/bootstrap.min.js' %}"></script> 
+	
+</body>
+</html>

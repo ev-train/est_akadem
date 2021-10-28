@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Эстетика Академгородка</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'main/css/bootstrap.min.css' %}" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300&display=swap" rel="stylesheet"> 
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar-dark navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'main:index' %}">
+          <img src="/static/main/img/logo.png" alt="" class="d-inline-block align-text-top logo">
+           Эстетика Академгородка
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'main:about' %}">О проекте</a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{% url 'main:profile' user.profile.id %}">Мой профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_profile' user.profile.id %}">Изменить профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:edit_account' %}">Изменить аккаунт</a></li>
+                <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
+              </ul>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:login' %}">Войти</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'main:register' %}">Зарегистрироваться</a>
+            </li>
+            {% endif %}
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="about">
+      <div class="col-md-6 offset-md-3">
+        <p><a href="{% url 'main:index' %}" class="link">Эстетика Академгородка</a> - сайт, предназначенный для просмотра и публикации фотографий Новосибирского Академгородка.</p>
+        <p>Разрешается публикация фотографий, если: </p>
+        <ul>
+          <li>фотографии сделаны в Академгородке и его окрестностях;</li>
+          <li>вы являетесь автором публикуемых фотографий.</li>
+        </ul>
+        <p>Сайт разработан Евгенией Трайниной (<a href="{% url 'main:profile' 1 %}" target="_blank" class="link">admin</a>).</p>
+      </div>
+    </div>
+
+
+  </div>  
+	<script src="{% static 'main/js/bootstrap.min.js' %}"></script> 
+	
+</body>
+</html>
