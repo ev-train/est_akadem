@@ -53,25 +53,3 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['comment_text']
-
-
-'''
-class PostForm(ModelForm):
-    class Meta:
-        model = Post
-        fields = ['post_text']
-        widgets = {
-            "post_text": Textarea(attrs = {
-                'class': 'form-control',
-                'placeholder': 'Текст'
-            })
-        }
-
-class PhotoForm(ModelForm):
-    photo = forms.ImageField(label=u'Фотографии', widget=forms.FileInput(attrs={'multiple': 'multiple'}))
-
-    class Meta:
-        model = Photo
-        fields = ['photo']
-
-'''
