@@ -1,4 +1,3 @@
-'''from .models import Post, Photo'''
 from django import forms
 from django.forms import ModelForm, fields, TextInput, widgets, Textarea, ImageField, FileInput
 from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm, UserCreationForm, AuthenticationForm
